@@ -5,7 +5,7 @@ Thanks for your visit!
  
 ## Introduction
 
-The codes include the analysis code for the scRNA-seq data.
+The codes include the analysis code for the scRNA-seq data from stromal vascular fraction (SVF) of human visceral adipose tissue (VAT).
 
 ## Usage
 
