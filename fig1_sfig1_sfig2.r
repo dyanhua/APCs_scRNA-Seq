@@ -14,7 +14,8 @@ names(cluster_colors)=rev(c("Mast cells","B cells","Myeloid cells","T/NKs","Adip
 DimPlot(Allsamples_ident, label = F,cols =cluster_colors,repel = T,pt.size = 0.001)
 DimPlot(Allsamples_ident, label = F,cols =cluster_colors,split.by = "Group",repel = T,pt.size = 0.001)
 markers=c("TPSB2","TPSAB1","JCHAIN","CD79A","CD14","CD68","NKG7","CD3D","PLIN1","ADIPOQ","PECAM1","CLDN5","MSLN","KRT18","APOD","PDGFRA")
-DotPlot(Allsamples_ident, features = rev(markers), cols =c("lightblue","red"),dot.scale = 8,scale.by = "radius") + RotatedAxis()+scale_color_gradient2(low = "#1861b8", mid = "white", high =  "#dd5035",midpoint = 0.75) 
+DotPlot(Allsamples_ident, features = rev(markers), cols =c("lightblue","red"),dot.scale = 8,scale.by = "radius") + RotatedAxis()+
+  scale_color_gradient2(low = "#1861b8", mid = "white", high =  "#dd5035",midpoint = 0.75) 
 library(RColorBrewer)
 FeaturePlot(Allsamples_ident,features = c("PDGFRA","ADIPOQ","VWF","KRT18","TPSAB1","CD68","CD3D","CD79A"),min.cutoff = 0.2,order = T,cols = c("grey","orange","red"),ncol = 8)
 
@@ -26,7 +27,7 @@ ClusterPer <- ClusterFreq %>% tidyr::spread(Celltype,Per)
 ClusterPer[,2:ncol(ClusterPer)] <- t(apply(ClusterPer[,2:ncol(ClusterPer)],1,function(x){x/sum(x)*100}))
 ClusterPer <- ClusterPer %>% tidyr::gather(key=Celltype,value=Per,-Sample)
 ClusterPer$Celltype=factor(ClusterPer$Celltype,levels =c("Mast cells","B cells","Myeloid cells","T/NKs","Adipocytes","Eodothelial cells","Mesothelium cells","APCs"))
-ggplot(data = ClusterPer, aes(x = Sample, fill=Celltype,y=Per)) + #log2(as.numeric(CopyNumber)))
+ggplot(data = ClusterPer, aes(x = Sample, fill=Celltype,y=Per)) + 
   geom_bar(stat = "identity",width = 0.6)+
   scale_y_continuous(expand=c(0,0))+labs(y="percentage(%)")+coord_flip()+
   scale_fill_manual(values=cluster_colors)+
@@ -34,6 +35,7 @@ ggplot(data = ClusterPer, aes(x = Sample, fill=Celltype,y=Per)) + #log2(as.numer
         panel.background = element_blank(),panel.grid=element_blank(),
         legend.title=element_blank(), axis.text.y=element_text(color = "black"),
         axis.title.x = element_blank(),axis.line = element_line(color="black"),legend.text = element_text(size=10))
+
 ####sfig1f
 ClusterPer$Group=gsub("OT.*","Obese T2D",gsub("ON.*","Obese",gsub("H.*","Lean control",ClusterPer$Sample)))
 data_summary <- function(data, varname, groupnames){
@@ -42,24 +44,23 @@ data_summary <- function(data, varname, groupnames){
     c(mean = mean(x[[col]], na.rm=TRUE),
       sd = sd(x[[col]], na.rm=TRUE))
   }
-  data_sum<-ddply(data, groupnames, .fun=summary_func,
-                  varname)
+  data_sum <- ddply(data, groupnames, .fun=summary_func, varname)
   data_sum <- rename(data_sum, c("mean" = varname))
   return(data_sum)
 }
-ClusterPerdf <- data_summary(ClusterPer, varname="Per", 
-                             groupnames=c("Group", "Celltype"))
+ClusterPerdf <- data_summary(ClusterPer, varname="Per", groupnames=c("Group", "Celltype"))
 ggplot(data = ClusterPerdf,  aes(x=Celltype, y=Per, fill=Group)) +
-  geom_bar(stat="identity", position=position_dodge())+geom_errorbar(aes(ymin=Per -sd, ymax=Per +sd), width=.2,position=position_dodge(.9))+
-  geom_jitter(data = ClusterPer,  aes(x=Celltype, y=Per, fill=Group),width =0.3,shape = 21,size=2)+scale_fill_manual(values = c("#92ca68","#c0ba73","#f08a7a"))
+  geom_bar(stat="identity", position=position_dodge())+
+  geom_errorbar(aes(ymin=Per -sd, ymax=Per +sd), width=.2,position=position_dodge(.9))+
+  geom_jitter(data = ClusterPer,  aes(x=Celltype, y=Per, fill=Group),width =0.3,shape = 21,size=2)+
+  scale_fill_manual(values = c("#92ca68","#c0ba73","#f08a7a"))
 
 #### immune clusters define
 immune=subset(Allsamples_ident,idents=c("Myeloid cells","T/NKs"))
 immune  <- NormalizeData(immune) %>% FindVariableFeatures(nfeatures = 2000)
 VGENES=VariableFeatures(immune)
 VGENES=setdiff(VGENES,VGENES[grep("^MT|^RPL|^RPS|^HSP|^HBB|^HBA|^HBG|^HBM|^HBE|^HBZ",VGENES)])
-immune <- ScaleData(immune,features =VGENES,vars.to.regress =c("percent.mito","nCount_RNA","percent.HB")) %>% RunPCA(npcs = 30, verbose = FALSE)%>% FindNeighbors(dims = 1:20)%>% 
-  RunUMAP(dims = 1:20) %>% FindClusters(resolution = 0.5, algorithm = 1)
+immune <- ScaleData(immune,features =VGENES,vars.to.regress =c("percent.mito","nCount_RNA","percent.HB")) %>% RunPCA(npcs = 30, verbose = FALSE)%>% 
 immune_harmony <- immune %>% 
   RunHarmony("orig.ident", plot_convergence = TRUE)
 harmony_embeddings <- Embeddings(immune_harmony, 'harmony')
@@ -102,7 +103,8 @@ apc_colors=c("#ffb6c1","#c71585","#8fbc8f","#add8e6")
 DimPlot(APCs_ident,cols = apc_colors,pt.size = 0.1)
 DimPlot(APCs_ident,split.by = "Sample",cols = apc_colors,pt.size = 0.1)
 DimPlot(APCs_ident,pt.size = 0.001,group.by = "Sample",order = T)
-VlnPlot(APCs_ident,group.by = "celltype",features = c("PDGFRA","CD55","CD9","ICAM1","F3","THY1","PI16","COL14A1","NABP1","CXCL12","CD34","SLPI","RARRES1","ABHD5","ABCA8","CD44","SEMA3C","SFRP4","ATF3","SVEP1"),ncol =5,cols =apc_colors,pt.size = 0)
+markers=c("PDGFRA","CD55","CD9","ICAM1","F3","THY1","PI16","COL14A1","NABP1","CXCL12","CD34","SLPI","RARRES1","ABHD5","ABCA8","CD44","SEMA3C","SFRP4","ATF3","SVEP1")
+VlnPlot(APCs_ident,group.by = "celltype",features = markers,ncol =5,cols =apc_colors,pt.size = 0)
 
 ####statics fig1e, fig1f,
 sname=APCs_ident
@@ -120,8 +122,7 @@ ggplot(data = ClusterPer, aes(x = Sample, fill=Celltype,y=Per)) + #log2(as.numer
         legend.title=element_blank(), axis.text.y=element_text(color = "black"),
         axis.title.x = element_blank(),axis.line = element_line(color="black"),legend.text = element_text(size=10))
 ClusterPer$Group=gsub("OT.*","OT",gsub("ON.*","ON",gsub("H.*","HC",ClusterPer$Sample)))
-ClusterPerdf <- data_summary(ClusterPer, varname="Per", 
-                             groupnames=c("Group", "Celltype"))
+ClusterPerdf <- data_summary(ClusterPer, varname="Per", groupnames=c("Group", "Celltype"))
 head(ClusterPerdf)
 ggplot(data = ClusterPerdf,  aes(x=Celltype, y=Per, fill=Group)) +
   geom_bar(stat="identity", position=position_dodge())+geom_errorbar(aes(ymin=Per -sd, ymax=Per +sd), width=.2,position=position_dodge(.9))+
@@ -135,6 +136,7 @@ APCs_ident@meta.data$Nature_G2<- apply(APCs_ident@assays$RNA@data[rownames(APCs_
 APCs_ident@meta.data$Nature_G3<- apply(APCs_ident@assays$RNA@data[rownames(APCs_ident@assays$RNA@data) %in% toupper(naturegenes$G3[1:20]),],2,mean)
 APCs_ident@meta.data$Nature_G4<- apply(APCs_ident@assays$RNA@data[rownames(APCs_ident@assays$RNA@data) %in% toupper(naturegenes$G4[1:20]),],2,mean)
 VlnPlot(APCs_ident,features = c("Nature_G1","Nature_G2","Nature_G3","Nature_G4"),pt.size = 0,cols = apc_colors,ncol = 4)
+
 ######fig1g-science papers
 science_g1 <-c("DPP4","PI16","CADM3","ALDH1A3","CD55","SEMA3C","PCOLCE2","WNT2","LIMCH1","IGFBP5","PCSK6","BMP7","RRAS2","AIF1L","DACT2")
 science_g2 <-c("DLK1","PREF1","PPARG","COL15A1","GSC","NTF3","VCAM1","LPL","ADAMTS4","COL27A1","SPARCL1","BRNPER","SPON1","LIGP1","PDE3A","THSD7A","CASP4","CXCL9","GGT5","ENPEP","CLDN15","TRIM25","SDC1")
@@ -143,6 +145,7 @@ APCs_ident@meta.data$g1_Dpp4<- apply(APCs_ident@assays$RNA@data[rownames(APCs_id
 APCs_identt@meta.data$g2_Icam1<- apply(APCs_ident@assays$RNA@data[rownames(APCs_ident@assays$RNA@data) %in% science_g2,],2,mean)
 APCs_ident@meta.data$g3_Cd142<- apply(APCs_ident@assays$RNA@data[rownames(APCs_ident@assays$RNA@data) %in% science_g3,],2,mean)
 VlnPlot(APCs_ident,features = c("Science_g1","Science_g2","Science_g3"),pt.size = 0,cols = apc_colors,ncol = 3)
+
 #####human nature papers
 humannaturegenes=read.xlsx(xlsxFile = "41586_2022_4518_MOESM4_ESM.xlsx",sheet =  "ASPC markers",colNames = T)
 APCs_ident@meta.data$hASP1<- apply(APCs_ident@assays$RNA@data[rownames(APCs_ident@assays$RNA@data) %in% humannaturegenes[humannaturegenes$X7=="hASPC1",8][1:20],],2,mean)
@@ -174,6 +177,7 @@ plot(reducedDim(sds_apcs), col = cell_colors_clust, pch = 16, cex = 0.5)
 lines(sds_apcs, lwd = 1, col = 'black')
 legend("right",inset = c(-0.7, 0),legend = unique(APCs_ident@active.ident), col = unique(cell_colors_clust), pch = 16, box.lwd = 0)
 dev.off()
+
 ####psudotime
 nc <- 3
 pt <- slingPseudotime(sds_apcs)
