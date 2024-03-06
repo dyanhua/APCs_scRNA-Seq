@@ -1,7 +1,7 @@
 ####fig4a
 mynet <- read.delim("/cellphonedb_out/count_network.txt", check.names = FALSE)
 net<- graph_from_data_frame(mynet)
-E(net)$width  <- E(net)$count/50  # 边点权重（粗细）
+E(net)$width  <- E(net)$count/50  
 length(unique(mynet$SOURCE)) 
 net2 <- net 
 for (i in 1:length(unique(mynet$SOURCE))){
@@ -24,12 +24,12 @@ for (i in 1:nrow(dedata)) dedata[i, ] <- scale(log(unlist(dedata[i, ]) + 1, 2))
 dedata <- as.matrix(dedata)
 samples <- rep(c('Disease group', 'Control group'), c(3, 3))    
 heat <- Heatmap(dedata, 
-                col = colorRampPalette(colors = rev(brewer.pal(9,"RdBu")))(11), #定义热图由低值到高值的渐变颜色
-                heatmap_legend_param = list(grid_height = unit(10,'mm')),  #图例高度设置
-                show_row_names = FALSE,  #不展示基因名称
+                col = colorRampPalette(colors = rev(brewer.pal(9,"RdBu")))(11), 
+                heatmap_legend_param = list(grid_height = unit(10,'mm')),
+                show_row_names = FALSE,  
                 top_annotation = HeatmapAnnotation(Group = samples, 
                                                    simple_anno_size = unit(2, 'mm'), 
-                                                   col = list(Group = c('Disease group' = '#FF9289', 'Control group' = '#00DAE0')),  #定义样本分组的颜色
+                                                   col = list(Group = c('Disease group' = '#FF9289', 'Control group' = '#00DAE0')), 
                                                    show_annotation_name = FALSE), 
                 column_names_gp = gpar(fontsize = 10), row_names_gp = gpar(fontsize = 6))
 
