@@ -5,7 +5,6 @@ library(magrittr)
 library(harmony)
 options(stringsAsFactors = F)
 set.seed(42)
-setwd("/work/yhdu/scRNA_HONOT/Figure/fig1/")
 
 #### Load all scRNA-seq data
 Allsamples_ident=readRDS("Allsamples_ident.rds.gz")
